@@ -1,10 +1,11 @@
-use starknet::{ContractAddress};
+use starknet::ContractAddress;
+use debug::PrintTrait;
 
 #[starknet::interface]
 trait IData<TContractState> {
-    fn other_func(self: @TContractState, other_contract: ContractAddress) -> felt252;
     fn get_data(self: @TContractState) -> felt252;
     fn set_data(ref self: TContractState, new_value: felt252);
+    fn other_func(self: @TContractState, other_contract: ContractAddress) -> felt252;
 }
 
 #[starknet::interface]
@@ -97,5 +98,33 @@ mod ownable {
                 caller == self.owner.read(), 'No you do not'
             ) //this reads the owner address stored in storage
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use starknet::syscalls::deploy_syscall;
+    use starknet::{ContractAddress, TryInto, Into, OptionTrait};
+    use array::{ArrayTrait, SpanTrait};
+    use result::ResultTrait;
+    use super::ownable;
+    use super::{IOwnableTraitDispatcher, IOwnableTraitDispatcherTrait};
+
+
+    #[test]
+    #[available_gas(10000000)]
+    fn unit_test() {
+        let admin_address: ContractAddress = 'admin'.try_into().unwrap();
+
+        let mut calldata = array![admin_address.into()];
+
+        let (address0, _) = deploy_syscall(
+            ownable::TEST_CLASS_HASH.try_into().unwrap(), 0, calldata.span(), false
+        )
+            .unwrap();
+
+        let mut contract0 = IOwnableTraitDispatcher { contract_address: address0 };
+
+        assert(admin_address == contract0.get_owner(), 'Not the owner');
     }
 }
