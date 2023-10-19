@@ -101,30 +101,53 @@ mod ownable {
     }
 }
 
-#[cfg(test)]
+// #[cfg(test)]
+// mod tests {
+//     use starknet::syscalls::deploy_syscall;
+//     use starknet::{ContractAddress, TryInto, Into, OptionTrait};
+//     use array::{ArrayTrait, SpanTrait};
+//     use result::ResultTrait;
+//     use super::ownable;
+//     use super::{IOwnableTraitDispatcher, IOwnableTraitDispatcherTrait};
+
+//     #[test]
+//     #[available_gas(10000000)]
+//     fn unit_test() {
+//         let admin_address: ContractAddress = 'admin'.try_into().unwrap();
+
+//         let mut calldata = array![admin_address.into()];
+
+//         let (address0, _) = deploy_syscall(
+//             ownable::TEST_CLASS_HASH.try_into().unwrap(), 0, calldata.span(), false
+//         )
+//             .unwrap();
+
+//         let mut contract0 = IOwnableTraitDispatcher { contract_address: address0 };
+
+//         assert(admin_address == contract0.get_owner(), 'Not the owner');
+//     }
+// }
+
 mod tests {
-    use starknet::syscalls::deploy_syscall;
     use starknet::{ContractAddress, TryInto, Into, OptionTrait};
     use array::{ArrayTrait, SpanTrait};
     use result::ResultTrait;
-    use super::ownable;
     use super::{IOwnableTraitDispatcher, IOwnableTraitDispatcherTrait};
-
+    use snforge_std::{declare, ContractClassTrait};
 
     #[test]
     #[available_gas(10000000)]
     fn unit_test() {
         let admin_address: ContractAddress = 'admin'.try_into().unwrap();
 
+        let contract = declare('ownable');
+
         let mut calldata = array![admin_address.into()];
 
-        let (address0, _) = deploy_syscall(
-            ownable::TEST_CLASS_HASH.try_into().unwrap(), 0, calldata.span(), false
-        )
-            .unwrap();
+        let contract_address = contract.deploy(@calldata).unwrap();
 
-        let mut contract0 = IOwnableTraitDispatcher { contract_address: address0 };
-
-        assert(admin_address == contract0.get_owner(), 'Not the owner');
+        let dispatcher = IOwnableTraitDispatcher { contract_address };
+        
+        assert(admin_address == dispatcher.get_owner(), 'Not the owner');
     }
 }
