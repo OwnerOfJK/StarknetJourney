@@ -95,12 +95,13 @@ mod ownable {
         fn owner_only(self: @ContractState) {
             let caller = get_caller_address();
             assert(
-                caller == self.owner.read(), 'No you do not'
+                caller == self.owner.read(), 'Caller is not the owner'
             ) //this reads the owner address stored in storage
         }
     }
 }
 
+// old version unit test
 // #[cfg(test)]
 // mod tests {
 //     use starknet::syscalls::deploy_syscall;
@@ -128,6 +129,7 @@ mod ownable {
 //     }
 // }
 
+// starknet-foundry unit test
 mod tests {
     use starknet::{ContractAddress, TryInto, Into, OptionTrait};
     use array::{ArrayTrait, SpanTrait};
@@ -147,7 +149,7 @@ mod tests {
         let contract_address = contract.deploy(@calldata).unwrap();
 
         let dispatcher = IOwnableTraitDispatcher { contract_address };
-        
+
         assert(admin_address == dispatcher.get_owner(), 'Not the owner');
     }
 }
