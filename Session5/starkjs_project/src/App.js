@@ -12,7 +12,6 @@ function App() {
   const [connection, setConnection] = useState();
   const [account, setAccount] = useState();
   const [address, setAddress] = useState();
-
   const [retrievedValue, setRetrievedValue] = useState("");
 
   useEffect(() => {
